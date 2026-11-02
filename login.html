@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=0.5">
+  <title>Login & Sign‑Up</title>
+  <link rel="stylesheet" href="login_style.css">
+</head>
+<body>
+<div class="form-container">
+  <h2 id="formTitle">Login</h2>
+  <form id="authForm">
+    <label for="username">Username</label>
+    <input type="text" id="username" required>
+
+    <label for="password">Password</label>
+    <input type="password" id="password" required>
+
+    <div class="show-password" id="showPasswordContainer">
+      <input type="checkbox" id="showPassword" onclick="togglePasswordVisibility()">
+      <label for="showPassword">Show Password</label>
+    </div>
+
+    <label for="confirmPassword" id="confirmPasswordLabel" style="display:none;">Confirm Password</label>
+    <input type="password" id="confirmPassword" style="display:none;">
+    <p id="passwordMatchMessage" style="font-size:0.85rem; margin:5px 0; display:none;"></p>
+
+    <button type="button" id="submitBtn" onclick="handleSubmit()">Login</button>
+    <p id="errorMessage"></p>
+    <p id="toggleText">Don't have an account? <a href="#" onclick="toggleForm(); return false;">Sign Up</a></p>
+  </form>
+</div>
+
+<script>
+let isLoginMode = true;
+
+function toggleForm(){
+  isLoginMode = !isLoginMode;
+  document.getElementById('formTitle').textContent = isLoginMode ? 'Login' : 'Sign Up';
+  document.getElementById('submitBtn').textContent = isLoginMode ? 'Login' : 'Sign Up';
+  document.getElementById('confirmPasswordLabel').style.display = isLoginMode ? 'none' : 'block';
+  document.getElementById('confirmPassword').style.display = isLoginMode ? 'none' : 'block';
+  document.getElementById('passwordMatchMessage').style.display = 'none';
+  document.getElementById('showPasswordContainer').style.display = isLoginMode ? 'flex' : 'none';
+  document.getElementById('toggleText').innerHTML = isLoginMode
+    ? "Don't have an account? <a href='#' onclick='toggleForm();return false;'>Sign Up</a>"
+    : "Already have an account? <a href='#' onclick='toggleForm();return false;'>Login</a>";
+  document.getElementById('authForm').reset();
+  document.getElementById('errorMessage').textContent='';
+}
+
+function togglePasswordVisibility(){
+  const pass=document.getElementById('password');
+  pass.type = pass.type==='password' ? 'text' : 'password';
+}
+
+function checkPasswordMatch(){
+  const p1=document.getElementById('password').value;
+  const p2=document.getElementById('confirmPassword').value;
+  const msg=document.getElementById('passwordMatchMessage');
+  if(!isLoginMode && p2){
+    msg.style.display='block';
+    if(p1===p2){ msg.textContent='✅ Passwords match'; msg.style.color='green'; }
+    else { msg.textContent='❌ Passwords do NOT match'; msg.style.color='red'; }
+  } else msg.style.display='none';
+}
+
+function handleSubmit(){
+  const user=document.getElementById('username').value.trim();
+  const pass=document.getElementById('password').value;
+  const err=document.getElementById('errorMessage');
+  if(!user||!pass){ err.textContent='⚠️ Fill in all fields!'; return; }
+
+  if(isLoginMode){
+    const savedUser=localStorage.getItem('regUser');
+    const savedPass=localStorage.getItem('regPass');
+    if(user===savedUser && pass===savedPass){
+      localStorage.setItem('isLoggedIn','true');
+      alert('✅ Welcome back! Logging you in...');
+      window.location.href='index.html';
+    } else err.textContent='❌ Invalid username or account not found';
+  } else {
+    const confirmPass=document.getElementById('confirmPassword').value;
+    if(pass!==confirmPass){ err.textContent='❌ Passwords do not match!'; return; }
+    localStorage.setItem('regUser',user);
+    localStorage.setItem('regPass',pass);
+    alert('🎉 Account created! Please log in now.');
+    toggleForm();
+  }
+}
+document.getElementById('confirmPassword').addEventListener('input',checkPasswordMatch);
+document.getElementById('password').addEventListener('input',checkPasswordMatch);
+</script>
+</body>
+</html>
